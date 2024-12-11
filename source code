@@ -1,0 +1,38 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
+
+# Load data (assuming CSV format)
+data = pd.read_csv('activity_data.csv')
+
+# Preprocess data
+# Example: encoding categorical variables, normalization, etc.
+data = pd.get_dummies(data, columns=['activity_type'], drop_first=True)
+data['BMI'] = data['weight'] / (data['height'] / 100) ** 2  # Body mass index
+
+# Define features (X) and target variable (y)
+X = data[['duration', 'intensity', 'weight', 'height', 'age', 'BMI']]
+y = data['calories_burnt']
+
+# Split data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a Random Forest model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Mean Absolute Error: {mae}")
+print(f"R-squared: {r2}")
+
+# Make a prediction for new data (example input)
+new_data = pd.DataFrame({'duration': [30], 'intensity': [2], 'weight': [70], 'height': [175], 'age': [25], 'BMI': [22.9]})
+calories_burnt = model.predict(new_data)
+print(f"Predicted Calories Burnt: {calories_burnt[0]}")
